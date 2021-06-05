@@ -1,7 +1,6 @@
 import sqlite3
 
 class senderInterface(object):
-
     def send(self):
         raise NotImplementedError()
 
@@ -27,5 +26,3 @@ class forcADsender(senderInterface):
 
         finally:
             db.close()
-
-        
