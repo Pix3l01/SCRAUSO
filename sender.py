@@ -8,9 +8,11 @@ class senderInterface(object):
         raise NotImplementedError()
 
 class forcADsender(senderInterface):
-    def __init__(self, db, token):
+    def __init__(self, db, token, url):
         self.db = db
-        self.token = token
+        self.url = url
+        self.headers = {"X-Team-Token" : token}
+
 
     def send(self):
         try:
