@@ -3,9 +3,6 @@ from requests import Request
 import requests
 import json
 
-male = 1
-bene = 0
-
 class senderInterface(object):
     def send(self):
         raise NotImplementedError()
@@ -33,7 +30,7 @@ class forcADsender(senderInterface):
         except Exception as e:
             print("Si è sminchiato tutto....")
             db.close()
-            return male
+            return
 
         finally:
             db.close()
@@ -42,7 +39,7 @@ class forcADsender(senderInterface):
 
         stats(json.loads(resp))
 
-        return bene
+        return
 
     def stats(resp):
         #coming soon
