@@ -3,6 +3,9 @@ from requests import Request
 import requests
 import json
 
+male = 1
+bene = 0
+
 class senderInterface(object):
     def send(self):
         raise NotImplementedError()
@@ -29,14 +32,17 @@ class forcADsender(senderInterface):
 
         except Exception as e:
             print("Si è sminchiato tutto....")
+            db.close()
+            return male
 
         finally:
             db.close()
 
-        jason = json.dumps(flags)
-        resp = requests.put(url=self.url, data=jason, headers=self.headers)
+        resp = requests.put(url=self.url, data=json.dumps(flags), headers=self.headers)
 
         stats(json.loads(resp))
+
+        return bene
 
     def stats(resp):
         #coming soon
