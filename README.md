@@ -14,4 +14,6 @@
 ## Status codes
 - 0: flag non ancora submittata
 - 1: flag submittata e accettata
-- 2: flag submittata e respinta
+- 2: flag submittata e respinta (vecchia)
+- 3: flag submittata e respinta (non valida)
+- 4: flag submittata e respinta (già inviata) 
