@@ -10,3 +10,8 @@
 
 - Penso il nome sia abbastanza esplicativo
 - Sono accettati suggerimenti per la "O"
+
+## Status codes
+- 0: flag non ancora submittata
+- 1: flag submittata e accettata
+- 2: flag submittata e respinta
