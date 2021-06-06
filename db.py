@@ -15,6 +15,7 @@ class database:
             'Tick' INT NULL,
             'Status' INT NULL DEFAULT 0,
             'Exploit' VARCHAR(45) NOT NULL,
+            'statistics' INT(1) DEFAULT 0,
             PRIMARY KEY ('Flag'))''')
 
         # Save (commit) the changes
