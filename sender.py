@@ -28,7 +28,7 @@ class forcADsender(senderInterface):
             flags = []
             i = 0
             for row in cursor:
-                flags.append(row)
+                flags.append(row[0])
                 i += 1
                 if i >= 100:
                     again = 1
@@ -39,11 +39,16 @@ class forcADsender(senderInterface):
             db.close()
             return
 
-        finally:
-            db.close()
+        db.close()
 
         resp = requests.put(url=self.url, data=json.dumps(flags), headers=self.headers)
-        resp = json.loads(resp)
+        try:
+            resp = json.loads(resp.text)
+        except Exception as e:
+            print(resp.text)
+            print(e)
+            print("No response... (maybe exactly 100 flags)")
+            return
         try:
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
@@ -58,16 +63,17 @@ class forcADsender(senderInterface):
                     status = 3
                 if("already" in r['msg']):
                     status = 4
-                cursor.execute(f"UPDATE submitter SET status={status} WHERE flag={flag}")
+                cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
 
-        except:
+        except Exception as e:
             print("Si è sminchiato tutto inserendo....")
+            print(e)
+            db.rollback()
             db.close()
             return
 
-        finally:
-            db.commit()
-            db.close()
+        db.commit()
+        db.close()
 
         if (again==1):
             self.send()
