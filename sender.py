@@ -15,6 +15,7 @@ class forcADsender(senderInterface):
 
 
     def send(self):
+        print("Sending...")
         #again è per il constraint di mandare al max 100 flag alla volta
         again = 0
         try:
@@ -52,9 +53,11 @@ class forcADsender(senderInterface):
         try:
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
-
+            if type(resp) is not list or resp[0] is not dict:
+                raise Exception("resp type is wrong", resp)
             for r in resp:
                 flag = r['flag']
+                print(flag)
                 if ("accepted" in r['msg']):
                     status = 1
                 if ("old" in r['msg']):
@@ -80,5 +83,5 @@ class forcADsender(senderInterface):
         print("Transazione effettuata con successo")
         return
 
-        
+
 sender=forcADsender
