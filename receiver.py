@@ -1,8 +1,10 @@
 from flask import Flask, request
 import db
 import sqlite3
+from sender import sender
 
 dbm: db.database
+senderino: sender
 tick = 0
 app = Flask(__name__)
 
@@ -10,6 +12,11 @@ app = Flask(__name__)
 def setDbm(dbman: db.database):
     global dbm
     dbm = dbman
+
+
+def setSender(send: sender):
+    global senderino
+    senderino = send
 
 
 @app.route('/tick')
@@ -43,7 +50,7 @@ def index():
         msg += f"<br>Duplicate flags: {duplicate}"
         if duplicate < len(flags):
             print("New flags!")
-            # TODO notice sender.py that there are new flags
+            senderino.send()
 
     else:
         msg = '''POST / HTTP/1.1<br>
@@ -51,9 +58,9 @@ def index():
                 Accept: application/json<br>
                 Content-Type: application/json<br>
                 {<br>
-                  "exploit": "invented exploit name",<br>
-                  "flags": [<br>
-                    "array with plain text flags"<br>
-                  ]<br>
+                  &nbsp"exploit": "invented exploit name",<br>
+                  &nbsp"flags": [<br>
+                    &nbsp&nbsp"array with plain text flags"<br>
+                  &nbsp]<br>
                 }'''
     return msg
