@@ -128,7 +128,7 @@ class ncsender(senderInterface):
         for f in flags:
             io.sendline(f)
             msg = io.recvline()
-            print(flag)
+            print(f)
             if ("accepted" in msg):
                 status.append(1)
             if ("old" in msg):
