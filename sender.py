@@ -21,7 +21,6 @@ class forcADsender(senderInterface):
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
 
-            #query placeholder
             query = "SELECT flag FROM submitter WHERE status=0"
             cursor.execute(query)
 
@@ -34,8 +33,9 @@ class forcADsender(senderInterface):
                     again = 1
                     break
 
-        except:
+        except Exception as e:
             print("Si è sminchiato tutto leggendo....")
+            print(e)
             db.close()
             return
 
@@ -47,7 +47,7 @@ class forcADsender(senderInterface):
         except Exception as e:
             print(resp.text)
             print(e)
-            print("No response... (maybe exactly 100 flags)")
+            print("No response...")
             return
         try:
             db = sqlite3.connect(self.db)
@@ -79,3 +79,6 @@ class forcADsender(senderInterface):
             self.send()
         print("Transazione effettuata con successo")
         return
+
+        
+sender=forcADsender
