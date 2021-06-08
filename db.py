@@ -10,13 +10,13 @@ class database:
         cur = con.cursor()
 
         # Create table
-        cur.execute('''CREATE TABLE IF NOT EXISTS 'Submitter' (
-            'Flag' VARCHAR(50) NOT NULL,
-            'Tick' INT NULL,
-            'Status' INT NULL DEFAULT 0,
-            'Exploit' VARCHAR(45) NOT NULL,
+        cur.execute('''CREATE TABLE IF NOT EXISTS 'submitter' (
+            'flag' VARCHAR(50) NOT NULL,
+            'tick' INT NULL,
+            'status' INT NULL DEFAULT 0,
+            'exploit' VARCHAR(45) NOT NULL,
             'statistics' INT(1) DEFAULT 0,
-            PRIMARY KEY ('Flag'))''')
+            PRIMARY KEY ('flag'))''')
 
         # Save (commit) the changes
         con.commit()
