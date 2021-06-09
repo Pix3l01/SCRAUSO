@@ -105,9 +105,6 @@ class ncsender(senderInterface):
             for row in cursor:
                 flags.append(row[0])
                 i += 1
-                if i >= 100:
-                    again = 1
-                    break
             print(f"{i} flags")
             db.close()
 
