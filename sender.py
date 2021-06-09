@@ -144,6 +144,7 @@ class ncsender(senderInterface):
                 cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
             db.commit()
             db.close()
+            return
 
         except Exception as e:
             print("Si è sminchiato tutto inserendo....")
