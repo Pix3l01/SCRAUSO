@@ -1,0 +1,56 @@
+POST / HTTP/1.1
+Host: 127.0.0.1:5000
+Accept: application/json
+Content-Type: application/json
+
+{
+  "exploit": "Banana",
+  "flags": [
+    "m54Dsl6qa1",
+    "tEd8vfQuJ7",
+    "FXeIzs8BsF",
+    "nWbNW87gjq",
+    "wyU07DrGR2",
+    "RPNE0XTtH0",
+    "gw6ib3jjdq",
+    "bFUNmCkiXw",
+    "4OCtB88j06",
+    "KoHajzqXPn",
+    "mFrDSSJMYP",
+    "SFp0pcB7dI",
+    "S5v2h6ad65",
+    "WF0YJxjCSD",
+    "FOdJ5EDCbe",
+    "2ejoskctha",
+    "Q8WuqeI26V",
+    "Mu3O1DxmSr",
+    "KjZEHDoCu5"
+  ]
+}
+
+
+###
+
+GET /tick?t=1 HTTP/1.1
+Host: 127.0.0.1:5000
+Accept: */*
+
+###
+
+POST / HTTP/1.1
+Host: 127.0.0.1:5000
+Accept: application/json
+Content-Type: application/json
+
+{
+  "exploit": "Banana",
+  "flags": [
+    "m54Dsl6qa1",
+    "tEd8vfQuJ7",
+    "FXeIzs8BsF",
+    "test{banana}",
+    "flag{gelato}",
+    "Mu3O1DxmSr",
+    "KjZEHDoCu5"
+  ]
+}
