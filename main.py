@@ -2,19 +2,18 @@ import receiver
 import db
 import tomli
 import sys
-from sender import sender
+import sender
 
 
-def start_receiver(dbm: db.database, send: sender, port: int):
+def start_receiver(dbm: db.database, sender_type, port: int):
     receiver.setDbm(dbm)
-    receiver.setSender(send)
+    receiver.setSender(sender_type)
     receiver.app.run(host='0.0.0.0', port=port)
 
 
 def load_config(path: str):
-    print(
-        'I\'m lazy so the program check for the existence of every parameter of the config even if not necessary. So \
-        if you have error add also useless dummy parameters')
+    print('I\'m lazy so the program check for the existence of every parameter of the config even if not necessary. \
+So if you have error add also useless dummy parameters')
     try:
         with open(path, encoding="utf-8") as f:
             config = tomli.load(f)
@@ -38,17 +37,21 @@ def load_config(path: str):
 
 
 if __name__ == '__main__':
+    class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender}
     if len(sys.argv) != 2:
         print('\nIt needs a config file as argument')
         exit(0)
     print('Loading configs', end=' ')
     config_dict = load_config(sys.argv[1])
-    senderino: sender
     if config_dict['sender']['sender'] == 'forcADsender':
-        senderino = sender(config_dict['general']['db'], config_dict['sender']['token'], config_dict['sender']['link'])
+        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+                                                                    config_dict['sender']['token'],
+                                                                    config_dict['sender']['link'])
     elif config_dict['sender']['sender'] == 'ncsender':
-        senderino = sender(config_dict['general']['db'], config_dict['sender']['token'], config_dict['sender']['ip'],
-                           config_dict['sender']['port'])
+        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+                                                                    config_dict['sender']['token'],
+                                                                    config_dict['sender']['ip'],
+                                                                    config_dict['sender']['port'])
     else:
         print('Sender method not defined')
         exit(3)
@@ -57,4 +60,4 @@ if __name__ == '__main__':
     dbm.init_database()
     print('done!')
     print('Starting receiver')
-    start_receiver(dbm, senderino, config_dict['general']['port'])
+    start_receiver(dbm, sender_object, config_dict['general']['port'])

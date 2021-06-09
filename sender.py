@@ -4,20 +4,21 @@ import requests
 import json
 from pwn import *
 
+
 class senderInterface(object):
     def send(self):
         raise NotImplementedError()
+
 
 class forcADsender(senderInterface):
     def __init__(self, db, token, url):
         self.db = db
         self.url = url
-        self.headers = {"X-Team-Token" : token}
-
+        self.headers = {"X-Team-Token": token}
 
     def send(self):
         print("Sending...")
-        #again è per il constraint di mandare al max 100 flag alla volta
+        # again è per il constraint di mandare al max 100 flag alla volta
         again = 0
         try:
             db = sqlite3.connect(self.db)
@@ -54,7 +55,7 @@ class forcADsender(senderInterface):
         try:
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
-            if type(resp) is not list or resp[0] is not dict:
+            if type(resp) is not list or type(resp[0]) is not dict:
                 raise Exception("resp type is wrong", resp)
             for r in resp:
                 flag = r['flag']
@@ -65,7 +66,7 @@ class forcADsender(senderInterface):
                     status = 2
                 if ("invalid" in r['msg']):
                     status = 3
-                if("already" in r['msg']):
+                if ("already" in r['msg']):
                     status = 4
                 cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
 
@@ -79,10 +80,11 @@ class forcADsender(senderInterface):
         db.commit()
         db.close()
 
-        if (again==1):
+        if (again == 1):
             self.send()
         print("Transazione effettuata con successo")
         return
+
 
 class ncsender(senderInterface):
     def __init__(self, db, token, ip, port):
@@ -135,7 +137,7 @@ class ncsender(senderInterface):
                 status.append(2)
             if ("invalid" in msg):
                 status.append(3)
-            if("already" in msg):
+            if ("already" in msg):
                 status.append(4)
         try:
             db = sqlite3.connect(self.db)
@@ -153,4 +155,3 @@ class ncsender(senderInterface):
         db.commit()
         db.close()
 
-sender=forcADsender

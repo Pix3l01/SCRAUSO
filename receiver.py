@@ -1,7 +1,7 @@
 from flask import Flask, request
 import db
 import sqlite3
-from sender import sender
+import sender
 
 dbm: db.database
 senderino: sender
