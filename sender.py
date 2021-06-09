@@ -1,5 +1,4 @@
 import sqlite3
-from requests import Request
 import requests
 import json
 from pwn import *
@@ -35,7 +34,7 @@ class forcADsender(senderInterface):
                 if i >= 100:
                     again = 1
                     break
-
+            print(f"{i} flags")
         except Exception as e:
             print("Si è sminchiato tutto leggendo....")
             print(e)
@@ -59,7 +58,7 @@ class forcADsender(senderInterface):
                 raise Exception("resp type is wrong", resp)
             for r in resp:
                 flag = r['flag']
-                print(flag)
+                #print(flag)
                 if ("accepted" in r['msg']):
                     status = 1
                 if ("old" in r['msg']):
@@ -69,6 +68,8 @@ class forcADsender(senderInterface):
                 if ("already" in r['msg']):
                     status = 4
                 cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
+                db.commit()
+                db.close()
 
         except Exception as e:
             print("Si è sminchiato tutto inserendo....")
@@ -77,10 +78,7 @@ class forcADsender(senderInterface):
             db.close()
             return
 
-        db.commit()
-        db.close()
-
-        if (again == 1):
+        if (again==1):
             self.send()
         print("Transazione effettuata con successo")
         return
@@ -110,6 +108,8 @@ class ncsender(senderInterface):
                 if i >= 100:
                     again = 1
                     break
+            print(f"{i} flags")
+            db.close()
 
         except Exception as e:
             print("Si è sminchiato tutto leggendo....")
@@ -117,20 +117,18 @@ class ncsender(senderInterface):
             db.close()
             return
 
-        db.close()
-
         status = []
         io = remote(self.ip, self.port)
         io.sendline(self.token)
         ans = io.recvline()
-        if "Invalid" in ans:
+        if b"Invalid" in ans:
             print(ans)
             return
 
         for f in flags:
             io.sendline(f)
             msg = io.recvline()
-            print(f)
+            #print(f)
             if ("accepted" in msg):
                 status.append(1)
             if ("old" in msg):
@@ -144,6 +142,8 @@ class ncsender(senderInterface):
             cursor = db.cursor()
             for i in range(len(flags)):
                 cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
+            db.commit()
+            db.close()
 
         except Exception as e:
             print("Si è sminchiato tutto inserendo....")
@@ -151,7 +151,3 @@ class ncsender(senderInterface):
             db.rollback()
             db.close()
             return
-
-        db.commit()
-        db.close()
-
