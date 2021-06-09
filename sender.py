@@ -68,8 +68,9 @@ class forcADsender(senderInterface):
                 if ("already" in r['msg']):
                     status = 4
                 cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
-                db.commit()
-                db.close()
+                
+            db.commit()
+            db.close()
 
         except Exception as e:
             print("Si è sminchiato tutto inserendo....")
