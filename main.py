@@ -37,7 +37,7 @@ So if you have error add also useless dummy parameters')
 
 
 if __name__ == '__main__':
-    class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender}
+    class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender, 'faustSender': sender.faustSender}
     if len(sys.argv) != 2:
         print('\nIt needs a config file as argument')
         exit(0)
