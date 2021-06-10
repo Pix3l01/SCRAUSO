@@ -52,6 +52,10 @@ if __name__ == '__main__':
                                                                     config_dict['sender']['token'],
                                                                     config_dict['sender']['ip'],
                                                                     config_dict['sender']['port'])
+    elif config_dict['sender']['sender'] == 'faustSender':
+        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+                                                                    config_dict['sender']['ip'],
+                                                                    config_dict['sender']['port'])
     else:
         print('Sender method not defined')
         exit(3)
