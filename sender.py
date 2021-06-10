@@ -61,14 +61,17 @@ class forcADsender(senderInterface):
                 #print(flag)
                 if ("accepted" in r['msg']):
                     status = 1
-                if ("old" in r['msg']):
+                elif ("old" in r['msg']):
                     status = 2
-                if ("invalid" in r['msg']):
+                elif ("invalid" in r['msg']):
                     status = 3
-                if ("already" in r['msg']):
+                elif ("already" in r['msg']):
                     status = 4
+                else:
+                    print("GS says: --> " + r['msg'] + "for flag=" + flag)
+                    status = 5
                 cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
-                
+
             db.commit()
             db.close()
 
@@ -127,14 +130,82 @@ class ncsender(senderInterface):
             io.sendline(f)
             msg = io.recvline()
             #print(f)
-            if ("accepted" in msg):
+            if (b"accepted" in msg):
                 status.append(1)
-            if ("old" in msg):
+            elif (b"old" in msg):
                 status.append(2)
-            if ("invalid" in msg):
+            elif (b"invalid" in msg):
                 status.append(3)
-            if ("already" in msg):
+            elif (b"already" in msg):
                 status.append(4)
+            else:
+                print(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
+                status.append(5)
+        try:
+            db = sqlite3.connect(self.db)
+            cursor = db.cursor()
+            for i in range(len(flags)):
+                cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
+            db.commit()
+            db.close()
+            return
+
+        except Exception as e:
+            print("Si è sminchiato tutto inserendo....")
+            print(e)
+            db.rollback()
+            db.close()
+            return
+
+class faustSender(senderInterface):
+    def __init__(self, db, ip, port):
+        self.db = db
+        self.ip = ip
+        self.port = port
+
+    def send(self):
+        print("Sending...")
+        try:
+            db = sqlite3.connect(self.db)
+            cursor = db.cursor()
+
+            query = "SELECT flag FROM submitter WHERE status=0"
+            cursor.execute(query)
+
+            flags = []
+            i = 0
+            for row in cursor:
+                flags.append(row[0])
+                i += 1
+            print(f"{i} flags")
+            db.close()
+
+        except Exception as e:
+            print("Si è sminchiato tutto leggendo....")
+            print(e)
+            db.close()
+            return
+
+        status = []
+        io = remote(self.ip, self.port)
+        banner = io.recv()
+
+        for f in flags:
+            io.sendline(f)
+            msg = io.recvline()
+            #print(f)
+            if (b"Thank you" in msg):
+                status.append(1)
+            elif (b"expired" in msg):
+                status.append(2)
+            elif (b"not recognized" in msg or b"No such flag" in msg):
+                status.append(3)
+            elif (b"once" in msg):
+                status.append(4)
+            else:
+                print(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
+                status.append(5)
+
         try:
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
