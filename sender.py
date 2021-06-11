@@ -198,7 +198,7 @@ class faustSender(senderInterface):
                 status.append(1)
             elif (b"expired" in msg):
                 status.append(2)
-            elif (b"not recognized" in msg or b"No such flag" in msg):
+            elif (b"not recognized" in msg or b"No such Flag" in msg):
                 status.append(3)
             elif (b"once" in msg):
                 status.append(4)
