@@ -5,10 +5,10 @@ import sys
 import sender
 
 
-def start_receiver(dbm: db.database, sender_type, port: int):
+def start_receiver(dbm: db.database, sender_type, ip: str, port: int):
     receiver.setDbm(dbm)
     receiver.setSender(sender_type)
-    receiver.app.run(host='0.0.0.0', port=port)
+    receiver.app.run(host=ip, port=port)
 
 
 def load_config(path: str):
@@ -26,6 +26,7 @@ So if you have error add also useless dummy parameters')
     assert 'general' in config, 'Missing block \'general\' in config'
     assert 'sender' in config, 'Missing block \'sender\' in config'
     assert 'db' in config['general'], 'Parameter \'db\' missing in config block [general]'
+    assert 'port' in config['general'], 'Parameter \'ip\' missing in config block [general]'
     assert 'port' in config['general'], 'Parameter \'port\' missing in config block [general]'
     assert 'link' in config['sender'], 'Parameter \'link\' missing in config block [sender]'
     assert 'token' in config['sender'], 'Parameter \'token\' missing in config block [sender]'
@@ -64,4 +65,4 @@ if __name__ == '__main__':
     dbm.init_database()
     print('done!')
     print('Starting receiver')
-    start_receiver(dbm, sender_object, config_dict['general']['port'])
+    start_receiver(dbm, sender_object, config_dict['general']['ip'], config_dict['general']['port'])
