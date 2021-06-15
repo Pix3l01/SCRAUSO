@@ -3,6 +3,8 @@ import db
 import tomli
 import sys
 import sender
+from time import sleep
+from threading import Thread
 
 
 def start_receiver(dbm: db.database, sender_type, ip: str, port: int):
@@ -28,6 +30,7 @@ So if you have error add also useless dummy parameters')
     assert 'db' in config['general'], 'Parameter \'db\' missing in config block [general]'
     assert 'port' in config['general'], 'Parameter \'ip\' missing in config block [general]'
     assert 'port' in config['general'], 'Parameter \'port\' missing in config block [general]'
+    assert 'scheduled_check' in config['general'], 'Parameter \'scheduled_check\' missing in config block [general]'
     assert 'link' in config['sender'], 'Parameter \'link\' missing in config block [sender]'
     assert 'token' in config['sender'], 'Parameter \'token\' missing in config block [sender]'
     assert 'ip' in config['sender'], 'Parameter \'ip\' missing in config block [sender]'
@@ -35,6 +38,25 @@ So if you have error add also useless dummy parameters')
     assert 'sender' in config['sender'], 'Parameter \'sender\' missing in config block [sender]'
     print('done!')
     return config
+
+
+def repeated_check(sleep_time: float, send: sender, database: db):
+    while True:
+        print("Checking for leftover flag")
+        query = "SELECT flag FROM submitter WHERE status=0"
+        missed_flags = []
+        try:
+            missed_flags = database.exec_query(query)
+        except Exception as e:
+            print('S\'è sminichiato tutto leggendo')
+            print(e)
+        if len(missed_flags) > 0:
+            print(f'{len(missed_flags)} missed flag(s) found')
+            send.send()
+        else:
+            print('No missed flags found')
+        print(f'Sleeping for {sleep_time} seconds')
+        sleep(sleep_time)
 
 
 if __name__ == '__main__':
@@ -64,5 +86,8 @@ if __name__ == '__main__':
     print('Initializing database', end=' ')
     dbm.init_database()
     print('done!')
+    print('Starting missed flag checker')
+    thread = Thread(target=repeated_check, args=(config_dict['general']['scheduled_check'], sender_object, dbm))
+    thread.start()
     print('Starting receiver')
     start_receiver(dbm, sender_object, config_dict['general']['ip'], config_dict['general']['port'])
