@@ -6,4 +6,4 @@ COPY ./requirements.txt .
 COPY ./scrauso.conf .
 
 RUN pip install -r requirements.txt
-CMD ["python", "main.py", "scrauso.conf"]
+CMD ["python", "-u", "main.py", "scrauso.conf"]
