@@ -19,8 +19,8 @@ So if you have error add also useless dummy parameters')
     try:
         with open(path, encoding="utf-8") as f:
             config = tomli.load(f)
-    except IOError:
-        print("Io error")
+    except IOError as e:
+        print(f"Io error: {e}")
         exit(1)
     except tomli.TOMLDecodeError:
         print("Can't load config")

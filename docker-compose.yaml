@@ -4,7 +4,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - ./utils/scrauso.conf:/scrauso.conf
     ports:
       - "5000:5000"
