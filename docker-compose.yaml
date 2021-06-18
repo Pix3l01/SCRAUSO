@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  scrauso:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./utils/scrauso.conf:/scrauso.conf
+    ports:
+      - "5000:5000"
