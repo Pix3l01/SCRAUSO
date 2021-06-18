@@ -40,6 +40,18 @@ So if you have error add also useless dummy parameters')
     return config
 
 
+def flags_per_exploit(database):
+    query = "SELECT DISTINCT exploit FROM submitter"
+    exploits = database.exec_query(query)
+    print(exploits)
+    for exploit in exploits:
+        qCount = f"SELECT COUNT(flag) FROM submitter WHERE exploit = '{exploit[0]}' AND status = 1"
+        print(f"Query: {qCount}")
+        i = database.exec_query(qCount)
+        print(f'Flags correctly submitted for {exploit[0]}: {i[0][0]}')
+    return
+
+
 def repeated_check(sleep_time: float, send: sender, database: db):
     while True:
         print("Checking for leftover flag")
@@ -55,6 +67,7 @@ def repeated_check(sleep_time: float, send: sender, database: db):
             send.send()
         else:
             print('No missed flags found')
+        flags_per_exploit(database)
         print(f'Sleeping for {sleep_time} seconds')
         sleep(sleep_time)
 
