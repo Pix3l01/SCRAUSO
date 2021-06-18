@@ -27,7 +27,7 @@ class database:
     def exec_query(self, query: str):
         con = sqlite3.connect(self.path)
         cur = con.cursor()
-        res = cur.execute(query)
+        res = cur.execute(query).fetchall()
         con.commit()
         con.close()
         return res
