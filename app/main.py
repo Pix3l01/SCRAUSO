@@ -46,7 +46,6 @@ def flags_per_exploit(database):
     print(exploits)
     for exploit in exploits:
         qCount = f"SELECT COUNT(flag) FROM submitter WHERE exploit = '{exploit[0]}' AND status = 1"
-        print(f"Query: {qCount}")
         i = database.exec_query(qCount)
         print(f'Flags correctly submitted for {exploit[0]}: {i[0][0]}')
     return

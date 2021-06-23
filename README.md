@@ -25,13 +25,23 @@ pip3 install -r requirements.txt
 python3 main.py "path/to/config"
 ```
 
+### Docker
+```
+docker-compose up -d
+```
+Per modificare la porta esposta dal docker nel file ```docker-compose.yaml``` 
+modificare il campo ```ports``` da ```5000:5000``` a ```NUOVA_PORTA:5000``` 
+(non modificarla nel file di configurazione)
+
 ### Configurazione
-Il file di configurazione è scritto in [TOML](https://toml.io/)<br>
+Il file di configurazione è scritto in [TOML](https://toml.io/) <br>
 Al momento è necessario inserire e inizializzare tutti i parametri indipendentemente dal metodo utilizzato
 ```
 [general]
 db = "string" # Path del file database
+ip = "string" # IP of flask server
 port = int # Porta utilizzata dal submitter per ricevere le flag da inviare
+scheduled_check = int # seconds of interval between checks for leftovers flags
 
 [sender]
 sender = "string" # Tipo di sender da utilizzare. Al momento: "forcADsender" e "ncsender"
