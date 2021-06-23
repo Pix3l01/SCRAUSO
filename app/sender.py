@@ -1,4 +1,3 @@
-import sqlite3
 import requests
 import json
 from pwn import *
@@ -17,31 +16,9 @@ class forcADsender(senderInterface):
 
     def send(self):
         print("Sending...")
+        flags = self.db.get_flags_to_send(100)
         # again è per il constraint di mandare al max 100 flag alla volta
-        again = 0
-        try:
-            db = sqlite3.connect(self.db)
-            cursor = db.cursor()
-
-            query = "SELECT flag FROM submitter WHERE status=0"
-            cursor.execute(query)
-
-            flags = []
-            i = 0
-            for row in cursor:
-                flags.append(row[0])
-                i += 1
-                if i >= 100:
-                    again = 1
-                    break
-            print(f"{i} flags")
-        except Exception as e:
-            print("Si è sminchiato tutto leggendo....")
-            print(e)
-            db.close()
-            return
-
-        db.close()
+        again = len(flags) >= 100
 
         resp = requests.put(url=self.url, data=json.dumps(flags), headers=self.headers)
         try:
@@ -51,38 +28,29 @@ class forcADsender(senderInterface):
             print(e)
             print("No response...")
             return
-        try:
-            db = sqlite3.connect(self.db)
-            cursor = db.cursor()
-            if type(resp) is not list or type(resp[0]) is not dict:
-                raise Exception("resp type is wrong", resp)
-            for r in resp:
-                flag = r['flag']
-                #print(flag)
-                if ("accepted" in r['msg']):
-                    status = 1
-                elif ("old" in r['msg']):
-                    status = 2
-                elif ("invalid" in r['msg']):
-                    status = 3
-                elif ("already" in r['msg']):
-                    status = 4
-                else:
-                    print("GS says: --> " + r['msg'] + "for flag=" + flag)
-                    status = 5
-                cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
 
-            db.commit()
-            db.close()
+        status = []
 
-        except Exception as e:
-            print("Si è sminchiato tutto inserendo....")
-            print(e)
-            db.rollback()
-            db.close()
-            return
+        if type(resp) is not list or type(resp[0]) is not dict:
+            raise Exception("resp type is wrong", resp)
+        for r in resp:
+            flag = r['flag']
+            #print(flag)
+            if ("accepted" in r['msg']):
+                status.append(1)
+            elif ("old" in r['msg']):
+                status.append(2)
+            elif ("invalid" in r['msg']):
+                status.append(3)
+            elif ("already" in r['msg']):
+                status.append(4)
+            else:
+                print("GS says: --> " + r['msg'] + "for flag=" + flag)
+                status.append(5)
 
-        if (again==1):
+        self.db.mark_flag_as_sent(status, flags)
+
+        if again:
             self.send()
         print("Transazione effettuata con successo")
         return
@@ -97,26 +65,7 @@ class ncsender(senderInterface):
 
     def send(self):
         print("Sending...")
-        try:
-            db = sqlite3.connect(self.db)
-            cursor = db.cursor()
-
-            query = "SELECT flag FROM submitter WHERE status=0"
-            cursor.execute(query)
-
-            flags = []
-            i = 0
-            for row in cursor:
-                flags.append(row[0])
-                i += 1
-            print(f"{i} flags")
-            db.close()
-
-        except Exception as e:
-            print("Si è sminchiato tutto leggendo....")
-            print(e)
-            db.close()
-            return
+        flags = self.db.get_flags_to_send(-1)
 
         status = []
         io = remote(self.ip, self.port)
@@ -141,21 +90,8 @@ class ncsender(senderInterface):
             else:
                 print(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
                 status.append(5)
-        try:
-            db = sqlite3.connect(self.db)
-            cursor = db.cursor()
-            for i in range(len(flags)):
-                cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
-            db.commit()
-            db.close()
-            return
 
-        except Exception as e:
-            print("Si è sminchiato tutto inserendo....")
-            print(e)
-            db.rollback()
-            db.close()
-            return
+        self.db.mark_flag_as_sent(status, flags)
 
 class faustSender(senderInterface):
     def __init__(self, db, ip, port):
@@ -165,26 +101,7 @@ class faustSender(senderInterface):
 
     def send(self):
         print("Sending...")
-        try:
-            db = sqlite3.connect(self.db)
-            cursor = db.cursor()
-
-            query = "SELECT flag FROM submitter WHERE status=0"
-            cursor.execute(query)
-
-            flags = []
-            i = 0
-            for row in cursor:
-                flags.append(row[0])
-                i += 1
-            print(f"{i} flags")
-            db.close()
-
-        except Exception as e:
-            print("Si è sminchiato tutto leggendo....")
-            print(e)
-            db.close()
-            return
+        flags = self.db.get_flags_to_send(-1)
 
         status = []
         io = remote(self.ip, self.port)
@@ -206,18 +123,4 @@ class faustSender(senderInterface):
                 print(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
                 status.append(5)
 
-        try:
-            db = sqlite3.connect(self.db)
-            cursor = db.cursor()
-            for i in range(len(flags)):
-                cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
-            db.commit()
-            db.close()
-            return
-
-        except Exception as e:
-            print("Si è sminchiato tutto inserendo....")
-            print(e)
-            db.rollback()
-            db.close()
-            return
+        self.db.mark_flag_as_sent(status, flags)

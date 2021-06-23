@@ -27,10 +27,13 @@ So if you have error add also useless dummy parameters')
         exit(2)
     assert 'general' in config, 'Missing block \'general\' in config'
     assert 'sender' in config, 'Missing block \'sender\' in config'
-    assert 'db' in config['general'], 'Parameter \'db\' missing in config block [general]'
     assert 'port' in config['general'], 'Parameter \'ip\' missing in config block [general]'
     assert 'port' in config['general'], 'Parameter \'port\' missing in config block [general]'
     assert 'scheduled_check' in config['general'], 'Parameter \'scheduled_check\' missing in config block [general]'
+    assert 'address' in config['database'], 'Parameter \'address\' missing in config block [database]'
+    assert 'name' in config['database'], 'Parameter \'name\' missing in config block [database]'
+    assert 'username' in config['database'], 'Parameter \'username\' missing in config block [database]'
+    assert 'password' in config['database'], 'Parameter \'password\' missing in config block [database]'
     assert 'link' in config['sender'], 'Parameter \'link\' missing in config block [sender]'
     assert 'token' in config['sender'], 'Parameter \'token\' missing in config block [sender]'
     assert 'ip' in config['sender'], 'Parameter \'ip\' missing in config block [sender]'
@@ -79,26 +82,26 @@ if __name__ == '__main__':
         exit(0)
     print('Loading configs', end=' ')
     config_dict = load_config(sys.argv[1])
+    dbm = db.database(config_dict['database']['address'], config_dict['database']['name'], config_dict['database']['username'], config_dict['database']['password'])
+    print('Initializing database', end=' ')
+    dbm.init_database()
+    print('done!')
     if config_dict['sender']['sender'] == 'forcADsender':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+        sender_object = class_dict[config_dict['sender']['sender']](dbm,
                                                                     config_dict['sender']['token'],
                                                                     config_dict['sender']['link'])
     elif config_dict['sender']['sender'] == 'ncsender':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+        sender_object = class_dict[config_dict['sender']['sender']](dbm,
                                                                     config_dict['sender']['token'],
                                                                     config_dict['sender']['ip'],
                                                                     config_dict['sender']['port'])
     elif config_dict['sender']['sender'] == 'faustSender':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+        sender_object = class_dict[config_dict['sender']['sender']](dbm,
                                                                     config_dict['sender']['ip'],
                                                                     config_dict['sender']['port'])
     else:
         print('Sender method not defined')
         exit(3)
-    dbm = db.database(config_dict['general']['db'])
-    print('Initializing database', end=' ')
-    dbm.init_database()
-    print('done!')
     print('Starting missed flag checker')
     thread = Thread(target=repeated_check, args=(config_dict['general']['scheduled_check'], sender_object, dbm))
     thread.start()

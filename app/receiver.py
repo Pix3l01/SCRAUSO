@@ -1,6 +1,5 @@
 from flask import Flask, request
 import db
-import sqlite3
 import sender
 
 dbm: db.database
@@ -41,12 +40,9 @@ def index():
         flags = content['flags']
         msg = "The exploit " + exploit + " has " + str(len(flags)) + " flags!"
         for flag in flags:
-            # TODO implement prepared statement
-            query = f"INSERT INTO submitter VALUES ('{flag}', {tick}, 0, '{exploit}', 0)"
-            try:
-                dbm.exec_query(query)
-            except sqlite3.IntegrityError:
+            if dbm.insert_flags(flag, tick, exploit):
                 duplicate += 1
+        
         msg += f"<br>Duplicate flags: {duplicate}"
         if duplicate < len(flags):
             print("New flags!")
