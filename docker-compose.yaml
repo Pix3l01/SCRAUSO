@@ -6,3 +6,23 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    networks: 
+      - storage
+
+  mariadb:
+    image: "mariadb:${MARIADB_VERSION}"
+    restart: 'always'
+    volumes: 
+      - "./data:${MARIADB_DATA_DIR}"
+      - "./logs:${MARIADB_LOG_DIR}"
+      - ./conf:/etc/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+    networks: 
+      - storage
+
+networks:
+  storage:
