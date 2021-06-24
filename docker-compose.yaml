@@ -19,8 +19,7 @@ services:
     image: "mariadb:${MARIADB_VERSION}"
     restart: 'always'
     volumes: 
-      - "./data:${MARIADB_DATA_DIR}"
-      - "./logs:${MARIADB_LOG_DIR}"
+      - "./mariadb:/var/lib/mysql"
       - ./conf:/etc/mysql
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
@@ -31,7 +30,8 @@ services:
       - storage
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
-      timeout: 20s
+      interval: 5s
+      timeout: 5s
       retries: 10
 
 networks:
