@@ -54,7 +54,7 @@ def flags_per_exploit(database):
 def repeated_check(sleep_time: float, send: sender, database: db):
     while True:
         print("Checking for leftover flag")
-        query = "SELECT flag FROM submitter WHERE status=0"
+        query = "SELECT flag FROM submitter WHERE status=0 OR status=5"
         missed_flags = []
         try:
             missed_flags = database.exec_query(query)
