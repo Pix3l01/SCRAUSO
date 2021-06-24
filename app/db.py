@@ -69,7 +69,7 @@ class database:
             db = self.connect()
             cursor = db.cursor()
 
-            query = "SELECT flag FROM submitter WHERE status=0"
+            query = "SELECT flag FROM submitter WHERE status=0 OR status=5"
             cursor.execute(query)
 
             flags = []
