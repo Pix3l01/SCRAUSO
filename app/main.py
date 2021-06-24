@@ -5,12 +5,13 @@ import sys
 import sender
 from time import sleep
 from threading import Thread
+from waitress import serve
 
 
 def start_receiver(dbm: db.database, sender_type, ip: str, port: int):
     receiver.setDbm(dbm)
     receiver.setSender(sender_type)
-    receiver.app.run(host=ip, port=port)
+    serve(receiver.app, host=ip, port=port)
 
 
 def load_config(path: str):

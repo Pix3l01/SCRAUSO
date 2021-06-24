@@ -3,3 +3,4 @@ Flask==2.0.1
 requests==2.25.1
 pwn==1.0
 mariadb==1.0.7
+waitress==2.0.0
