@@ -8,37 +8,9 @@ services:
       - '5000:5000'
     networks:
       - storage
-    depends_on:
-      mariadb:
-        condition: service_healthy
     environment:
       TERM: linux
       TERMINFO: /etc/terminfo
-  mariadb:
-    image: 'mariadb:${MARIADB_VERSION}'
-    restart: always
-    volumes:
-      - './mariadb:/var/lib/mysql'
-      - './conf:/etc/mysql'
-    environment:
-      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-      MYSQL_DATABASE: '${MYSQL_DATABASE}'
-      MYSQL_USER: '${MYSQL_USER}'
-      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
-    networks:
-      - storage
-    healthcheck:
-      test:
-        - CMD
-        - mysqladmin
-        - ping
-        - '-h'
-        - localhost
-        - '-uroot'
-        - '-p${MYSQL_ROOT_PASSWORD}'
-      interval: 5s
-      timeout: 5s
-      retries: 20
 networks:
   storage:
     external: true

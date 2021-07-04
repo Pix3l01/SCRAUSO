@@ -25,7 +25,7 @@ class boskelHandler(logging.Handler):
         msg = {'name': data['name'], 'message': str(data['msg']), 'level': data['levelname'],
                'created': data['created']}
         try:
-            requests.post("http://127.0.0.1:7893/log", timeout=1, headers={'Content-Type': 'application/json'},
+            requests.post("http://boskel:7893/log", timeout=1, headers={'Content-Type': 'application/json'},
                           data=json.dumps(msg))
         except Exception as ex:
             print("boskelHandler error, you can ignore this. " + str(ex), flush=True)
