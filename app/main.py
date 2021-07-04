@@ -1,3 +1,4 @@
+from logger import logger
 import receiver
 import db
 import tomli
@@ -11,20 +12,20 @@ from waitress import serve
 def start_receiver(dbm: db.database, sender_type, ip: str, port: int):
     receiver.setDbm(dbm)
     receiver.setSender(sender_type)
-    serve(receiver.app, host=ip, port=port)
+    serve(receiver.app, host=ip, port=port, _quiet=True)  # TODO _quiet is not a public API, change this
 
 
 def load_config(path: str):
-    print('I\'m lazy so the program check for the existence of every parameter of the config even if not necessary. \
+    logger.debug('I\'m lazy so the program check for the existence of every parameter of the config even if not necessary. \
 So if you have error add also useless dummy parameters')
     try:
         with open(path, encoding="utf-8") as f:
             config = tomli.load(f)
     except IOError as e:
-        print(f"Io error: {e}")
+        logger.critical(f"Io error: {e}")
         exit(1)
     except tomli.TOMLDecodeError:
-        print("Can't load config")
+        logger.critical("Can't load config")
         exit(2)
     assert 'general' in config, 'Missing block \'general\' in config'
     assert 'sender' in config, 'Missing block \'sender\' in config'
@@ -40,53 +41,53 @@ So if you have error add also useless dummy parameters')
     assert 'ip' in config['sender'], 'Parameter \'ip\' missing in config block [sender]'
     assert 'port' in config['sender'], 'Parameter \'port\' missing in config block [sender]'
     assert 'sender' in config['sender'], 'Parameter \'sender\' missing in config block [sender]'
-    print('done!')
+    logger.info('Config loaded!')
     return config
 
 
 def flags_per_exploit(database):
     query = "SELECT DISTINCT exploit FROM submitter"
     exploits = database.exec_query(query)
-    print(exploits)
+    logger.debug(exploits)
     for exploit in exploits:
         qCount = f"SELECT COUNT(flag) FROM submitter WHERE exploit = '{exploit[0]}' AND status = 1 OR status = 5"
-        print(f"Query: {qCount}")
+        logger.debug(f"Query: {qCount}")
         i = database.exec_query(qCount)
-        print(f'Flags correctly submitted for {exploit[0]}: {i[0][0]}')
+        logger.info(f'Flags correctly submitted for {exploit[0]}: {i[0][0]}')
     return
 
 
 def repeated_check(sleep_time: float, send: sender, database: db):
     while True:
-        print("Checking for leftover flag")
+        logger.info("Checking for leftover flag")
         query = "SELECT flag FROM submitter WHERE status=0"
         missed_flags = []
         try:
             missed_flags = database.exec_query(query)
-        except Exception as e:
-            print('S\'è sminichiato tutto leggendo')
-            print(e)
+        except Exception:
+            logger.exception('S\'è sminichiato tutto leggendo')
         if len(missed_flags) > 0:
-            print(f'{len(missed_flags)} missed flag(s) found')
+            logger.info(f'{len(missed_flags)} missed flag(s) found')
             send.send()
         else:
-            print('No missed flags found')
+            logger.info('No missed flags found')
         flags_per_exploit(database)
-        print(f'Sleeping for {sleep_time} seconds')
+        logger.info(f'Sleeping for {sleep_time} seconds')
         sleep(sleep_time)
 
 
 if __name__ == '__main__':
     class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender, 'faustSender': sender.faustSender}
     if len(sys.argv) != 2:
-        print('\nIt needs a config file as argument')
+        logger.critical('\nIt needs a config file as argument')
         exit(0)
-    print('Loading configs', end=' ')
+    logger.info('Loading configs')
     config_dict = load_config(sys.argv[1])
-    dbm = db.database(config_dict['database']['address'], config_dict['database']['name'], config_dict['database']['username'], config_dict['database']['password'])
-    print('Initializing database', end=' ')
+    dbm = db.database(config_dict['database']['address'], config_dict['database']['name'],
+                      config_dict['database']['username'], config_dict['database']['password'])
+    logger.info('Initializing database')
     dbm.init_database()
-    print('done!')
+    logger.info('Database initialized!')
     if config_dict['sender']['sender'] == 'forcADsender':
         sender_object = class_dict[config_dict['sender']['sender']](dbm,
                                                                     config_dict['sender']['token'],
@@ -101,10 +102,10 @@ if __name__ == '__main__':
                                                                     config_dict['sender']['ip'],
                                                                     config_dict['sender']['port'])
     else:
-        print('Sender method not defined')
+        logger.critical('Sender method not defined')
         exit(3)
-    print('Starting missed flag checker')
+    logger.info('Starting missed flag checker')
     thread = Thread(target=repeated_check, args=(config_dict['general']['scheduled_check'], sender_object, dbm))
     thread.start()
-    print('Starting receiver')
+    logger.info('Starting receiver')
     start_receiver(dbm, sender_object, config_dict['general']['ip'], config_dict['general']['port'])

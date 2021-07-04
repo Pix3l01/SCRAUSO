@@ -1,6 +1,7 @@
 from flask import Flask, request
 import db
 import sender
+from logger import loggerReceiver as logger
 
 dbm: db.database
 senderino: sender
@@ -45,7 +46,7 @@ def index():
         
         msg += f"<br>Duplicate flags: {duplicate}"
         if duplicate < len(flags):
-            print("New flags!")
+            logger.info("New flags!")
             senderino.send()
 
     else:

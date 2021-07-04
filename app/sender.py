@@ -1,5 +1,6 @@
 import requests
 import json
+from logger import loggerSubmitter as logger
 from pwn import *
 
 
@@ -15,7 +16,7 @@ class forcADsender(senderInterface):
         self.headers = {"X-Team-Token": token}
 
     def send(self):
-        print("Sending...")
+        logger.info("Sending...")
         flags = self.db.get_flags_to_send(100)
         # again è per il constraint di mandare al max 100 flag alla volta
         again = len(flags) >= 100
@@ -24,9 +25,8 @@ class forcADsender(senderInterface):
         try:
             resp = json.loads(resp.text)
         except Exception as e:
-            print(resp.text)
-            print(e)
-            print("No response...")
+            logger.exception(resp.text)
+            logger.error("No response...")
             return
 
         status = []
@@ -45,14 +45,14 @@ class forcADsender(senderInterface):
             elif ("already" in r['msg']):
                 status.append(4)
             else:
-                print("GS says: --> " + r['msg'] + "for flag=" + flag)
+                logger.info("GS says: --> " + r['msg'] + "for flag=" + flag)
                 status.append(5)
 
         self.db.mark_flag_as_sent(status, flags)
 
         if again:
             self.send()
-        print("Transazione effettuata con successo")
+        logger.info("Transazione effettuata con successo")
         return
 
 
@@ -64,7 +64,7 @@ class ncsender(senderInterface):
         self.token = token
 
     def send(self):
-        print("Sending...")
+        logger.info("Sending...")
         flags = self.db.get_flags_to_send(-1)
 
         status = []
@@ -72,7 +72,7 @@ class ncsender(senderInterface):
         io.sendline(self.token)
         ans = io.recvline()
         if b"Invalid" in ans:
-            print(ans)
+            logger.error(ans)
             return
 
         for f in flags:
@@ -88,7 +88,7 @@ class ncsender(senderInterface):
             elif (b"already" in msg):
                 status.append(4)
             else:
-                print(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
+                logger.info(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
                 status.append(5)
 
         self.db.mark_flag_as_sent(status, flags)
@@ -100,7 +100,7 @@ class faustSender(senderInterface):
         self.port = port
 
     def send(self):
-        print("Sending...")
+        logger.info("Sending...")
         flags = self.db.get_flags_to_send(-1)
 
         status = []
@@ -120,7 +120,7 @@ class faustSender(senderInterface):
             elif (b"once" in msg):
                 status.append(4)
             else:
-                print(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
+                logger.info(b"GS says: --> " + msg + b" \n for flag=" + f.encode())
                 status.append(5)
 
         self.db.mark_flag_as_sent(status, flags)

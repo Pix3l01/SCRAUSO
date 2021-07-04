@@ -1,4 +1,5 @@
 import mariadb
+from logger import logger
 
 
 class database:
@@ -79,10 +80,9 @@ class database:
                 i += 1
                 if i >= limit and limit != -1:
                     break
-            print(f"{i} flags")
+            logger.info(f"{i} flags")
         except Exception as e:
-            print("Si è sminchiato tutto leggendo....")
-            print(e)
+            logger.exception("Si è sminchiato tutto leggendo....")
 
         db.close()
         return flags
@@ -95,8 +95,7 @@ class database:
                 cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
             db.commit()
         except Exception as e:
-            print("Si è sminchiato tutto inserendo....")
-            print(e)
+            logger.exception("Si è sminchiato tutto inserendo....")
             db.rollback()
         
         db.close()
