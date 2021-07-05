@@ -1,11 +1,11 @@
 from flask import Flask, request
+import time
 import db
 import sender
 from logger import loggerReceiver as logger
 
 dbm: db.database
 senderino: sender
-tick = 0
 app = Flask(__name__)
 
 
@@ -19,17 +19,6 @@ def setSender(send: sender):
     senderino = send
 
 
-@app.route('/tick')
-def updateTick():
-    global tick
-    t = request.args.get('t', type=int)
-    if t:
-        tick = request.args.get('t')
-        return f"Tick set to {tick}"
-    else:
-        return "Must contain parameter integer 't'"
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global tick
@@ -41,7 +30,7 @@ def index():
         flags = content['flags']
         msg = "The exploit " + exploit + " has " + str(len(flags)) + " flags!"
         for flag in flags:
-            if dbm.insert_flags(flag, tick, exploit):
+            if dbm.insert_flags(flag, time.time(), exploit):
                 duplicate += 1
         
         msg += f"<br>Duplicate flags: {duplicate}"

@@ -25,10 +25,9 @@ class database:
         # Create table
         cur.execute('''CREATE TABLE IF NOT EXISTS submitter (
             flag VARCHAR(50) NOT NULL,
-            tick INT NULL,
+            insertedAt DATETIME NULL,
             status INT NULL DEFAULT 0,
             exploit VARCHAR(45) NOT NULL,
-            statistics INT(1) DEFAULT 0,
             PRIMARY KEY (flag))''')
 
         # Save (commit) the changes
@@ -46,7 +45,7 @@ class database:
         con.close()
         return res
 
-    def insert_flags(self, flag: str, tick: int, exploit: str):
+    def insert_flags(self, flag: str, timestamp: int, exploit: str):
         duplicate = False
 
         try:
@@ -54,8 +53,8 @@ class database:
             cursor = con.cursor()
 
             cursor.execute(
-                "INSERT INTO submitter VALUES (?, ?, 0, ?, 0)", 
-                (flag, tick, exploit))
+                "INSERT INTO submitter VALUES (?, FROM_UNIXTIME(?), 0, ?)", 
+                (flag, timestamp, exploit))
             
             con.commit()
         except mariadb.IntegrityError:
