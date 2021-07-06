@@ -29,7 +29,7 @@ So if you have error add also useless dummy parameters')
         exit(2)
     assert 'general' in config, 'Missing block \'general\' in config'
     assert 'sender' in config, 'Missing block \'sender\' in config'
-    assert 'port' in config['general'], 'Parameter \'ip\' missing in config block [general]'
+    assert 'ip' in config['general'], 'Parameter \'ip\' missing in config block [general]'
     assert 'port' in config['general'], 'Parameter \'port\' missing in config block [general]'
     assert 'scheduled_check' in config['general'], 'Parameter \'scheduled_check\' missing in config block [general]'
     assert 'address' in config['database'], 'Parameter \'address\' missing in config block [database]'
@@ -77,7 +77,8 @@ def repeated_check(sleep_time: float, send: sender, database: db):
 
 
 if __name__ == '__main__':
-    class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender, 'faustSender': sender.faustSender}
+    class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender, 'faustSender': sender.faustSender,
+                  'ccit': sender.ccit}
     if len(sys.argv) != 2:
         logger.critical('\nIt needs a config file as argument')
         exit(0)
@@ -89,18 +90,14 @@ if __name__ == '__main__':
     dbm.init_database()
     logger.info('Database initialized!')
     if config_dict['sender']['sender'] == 'forcADsender':
-        sender_object = class_dict[config_dict['sender']['sender']](dbm,
-                                                                    config_dict['sender']['token'],
-                                                                    config_dict['sender']['link'])
+        sender_object = class_dict['forcADsender'](dbm, config_dict['sender']['token'], config_dict['sender']['link'])
     elif config_dict['sender']['sender'] == 'ncsender':
-        sender_object = class_dict[config_dict['sender']['sender']](dbm,
-                                                                    config_dict['sender']['token'],
-                                                                    config_dict['sender']['ip'],
-                                                                    config_dict['sender']['port'])
+        sender_object = class_dict['ncsender'](dbm, config_dict['sender']['token'], config_dict['sender']['ip'],
+                                               config_dict['sender']['port'])
     elif config_dict['sender']['sender'] == 'faustSender':
-        sender_object = class_dict[config_dict['sender']['sender']](dbm,
-                                                                    config_dict['sender']['ip'],
-                                                                    config_dict['sender']['port'])
+        sender_object = class_dict['faustSender'](dbm, config_dict['sender']['ip'], config_dict['sender']['port'])
+    elif config_dict['sender']['sender'] == 'ccit':
+        sender_object = class_dict['ccit'](dbm, config_dict['sender']['token'], config_dict['sender']['link'])
     else:
         logger.critical('Sender method not defined')
         exit(3)

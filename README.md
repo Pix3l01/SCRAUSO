@@ -26,7 +26,7 @@ python3 main.py "path/to/config"
 ```
 
 ### Configurazione
-Il file di configurazione è scritto in [TOML](https://toml.io/)<br>
+Il file di configurazione è scritto in [TOML](https://toml.io/) <br>
 Al momento è necessario inserire e inizializzare tutti i parametri indipendentemente dal metodo utilizzato
 ```
 [general]
