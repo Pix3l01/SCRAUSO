@@ -221,3 +221,67 @@ class faustSender(senderInterface):
             db.rollback()
             db.close()
             return
+
+class ctfzone(senderInterface):
+    def __init__(self, db, token, url):
+        self.db = db
+        self.url = url
+        self.headers = {"Authorization": token, "Content-Type": "application/json"}
+
+    def send(self):
+        print("Sending...")
+        try:
+            db = sqlite3.connect(self.db)
+            cursor = db.cursor()
+
+            query = "SELECT flag FROM submitter WHERE status=0 OR status=5"
+            cursor.execute(query)
+
+            flags = []
+            for row in cursor:
+                flags.append(row[0])
+        except Exception as e:
+            print("Si è sminchiato tutto leggendo....")
+            print(e)
+            db.close()
+            return
+
+        db.close()
+
+        for flag in flags:
+            data={"flag": flag}
+            r = requests.post(url=self.url, data=json.dumps(data), headers=self.headers)
+            print(r.text)
+            try:
+                r = json.loads(r.text)
+            except Exception as e:
+                print(r.text)
+                print(e)
+                print("No response...")
+                return
+            print(r)
+            try:
+                db = sqlite3.connect(self.db)
+                cursor = db.cursor()
+                #print(flag)
+                if (r['success']):
+                    status = 1
+                elif ("expired" in r['error']['msg']):
+                    status = 2
+                elif ("Not a flag" in r['error']['msg']):
+                    status = 3
+                elif ("already" in r['error']['msg']):
+                    status = 4
+                else:
+                    print("GS says: --> " + r['error']['msg'] + "for flag=" + flag)
+                    status = 5
+                cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
+            except Exception as e:
+                print("Si è sminchiato tutto inserendo....")
+                print(e)
+                db.rollback()
+                db.close()
+                return
+
+            db.commit()
+            db.close()
