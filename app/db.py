@@ -11,7 +11,7 @@ class database:
 
         # Create table
         cur.execute('''CREATE TABLE IF NOT EXISTS 'submitter' (
-            'flag' VARCHAR(50) NOT NULL,
+            'flag' VARCHAR(3000) NOT NULL,
             'tick' INT NULL,
             'status' INT NULL DEFAULT 0,
             'exploit' VARCHAR(45) NOT NULL,
