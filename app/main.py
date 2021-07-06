@@ -72,7 +72,8 @@ def repeated_check(sleep_time: float, send: sender, database: db):
 
 
 if __name__ == '__main__':
-    class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender, 'faustSender': sender.faustSender}
+    class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender, 'faustSender': sender.faustSender,
+                  'ctfzone': sender.ctfzone}
     if len(sys.argv) != 2:
         print('\nIt needs a config file as argument')
         exit(0)
@@ -91,15 +92,19 @@ if __name__ == '__main__':
         sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
                                                                     config_dict['sender']['ip'],
                                                                     config_dict['sender']['port'])
-    else:
-        print('Sender method not defined')
-        exit(3)
-    dbm = db.database(config_dict['general']['db'])
-    print('Initializing database', end=' ')
-    dbm.init_database()
-    print('done!')
-    print('Starting missed flag checker')
-    thread = Thread(target=repeated_check, args=(config_dict['general']['scheduled_check'], sender_object, dbm))
-    thread.start()
-    print('Starting receiver')
-    start_receiver(dbm, sender_object, config_dict['general']['ip'], config_dict['general']['port'])
+    elif config_dict['sender']['sender'] == 'ctfzone':
+        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+                                                                    config_dict['sender']['token'],
+                                                                    config_dict['sender']['link'])
+else:
+    print('Sender method not defined')
+    exit(3)
+dbm = db.database(config_dict['general']['db'])
+print('Initializing database', end=' ')
+dbm.init_database()
+print('done!')
+print('Starting missed flag checker')
+thread = Thread(target=repeated_check, args=(config_dict['general']['scheduled_check'], sender_object, dbm))
+thread.start()
+print('Starting receiver')
+start_receiver(dbm, sender_object, config_dict['general']['ip'], config_dict['general']['port'])
