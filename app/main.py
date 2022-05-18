@@ -73,7 +73,7 @@ def repeated_check(sleep_time: float, send: sender, database: db):
 
 if __name__ == '__main__':
     class_dict = {'forcADsender': sender.forcADsender, 'ncsender': sender.ncsender, 'faustSender': sender.faustSender,
-                  'ctfzone': sender.ctfzone}
+                  'ctfzone': sender.ctfzone, 'saarSender': sender.saarSender}
     if len(sys.argv) != 2:
         print('\nIt needs a config file as argument')
         exit(0)
@@ -96,6 +96,10 @@ if __name__ == '__main__':
         sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
                                                                     config_dict['sender']['token'],
                                                                     config_dict['sender']['link'])
+    elif config_dict['sender']['sender'] == 'saarSender':
+        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
+                                                                    config_dict['sender']['link'],
+                                                                    config_dict['sender']['port'])
 else:
     print('Sender method not defined')
     exit(3)

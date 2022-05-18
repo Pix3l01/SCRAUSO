@@ -57,4 +57,6 @@ port = int # Porta del submission server (inizializzarlo anche se non utilizzato
 - 2: flag submittata e respinta (vecchia)
 - 3: flag submittata e respinta (non valida)
 - 4: flag submittata e respinta (già inviata)
-- 5: flag submittata e respinta (altro aka malissimo) 
+- 5: flag submittata e respinta (NOP team)
+- 6: flag submittata e respinta (flag del tuo team)
+- 99: flag submittata e respinta (altro aka malissimo) 
