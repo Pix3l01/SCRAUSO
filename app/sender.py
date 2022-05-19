@@ -70,7 +70,7 @@ class forcADsender(senderInterface):
                 else:
                     print("GS says: --> " + r['msg'] + "for flag=" + flag)
                     status = 99
-                cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
+                cursor.execute(f"UPDATE submitter SET status=? WHERE flag='{flag}'", (status,))
 
             db.commit()
             db.close()
@@ -144,8 +144,9 @@ class ncsender(senderInterface):
         try:
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
+            # TODO: transform in cur.executemany
             for i in range(len(flags)):
-                cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
+                cursor.execute(f"UPDATE submitter SET status=? WHERE flag='{flags[i]}'", (status[i],))
             db.commit()
             db.close()
             return
@@ -210,8 +211,9 @@ class faustSender(senderInterface):
         try:
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
+            # TODO: transform in cur.executemany
             for i in range(len(flags)):
-                cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
+                cursor.execute(f"UPDATE submitter SET status=? WHERE flag='{flags[i]}'", (status[i],))
             db.commit()
             db.close()
             return
@@ -277,7 +279,7 @@ class ctfzone(senderInterface):
                 else:
                     print("GS says: --> " + r['error']['msg'] + "for flag=" + flag)
                     status = 99
-                cursor.execute(f"UPDATE submitter SET status={status} WHERE flag='{flag}'")
+                cursor.execute(f"UPDATE submitter SET status=? WHERE flag='{flag}'", (status,))
             except Exception as e:
                 print("Si è sminchiato tutto inserendo....")
                 print(e)
@@ -344,8 +346,9 @@ class saarSender(senderInterface):
         try:
             db = sqlite3.connect(self.db)
             cursor = db.cursor()
+            # TODO: transform in cur.executemany
             for i in range(len(flags)):
-                cursor.execute(f"UPDATE submitter SET status={status[i]} WHERE flag='{flags[i]}'")
+                cursor.execute(f"UPDATE submitter SET status=? WHERE flag='{flags[i]}'", (status[i],))
             db.commit()
             db.close()
             return

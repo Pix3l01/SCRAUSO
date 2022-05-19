@@ -42,9 +42,10 @@ def index():
         msg = "The exploit " + exploit + " has " + str(len(flags)) + " flags!"
         for flag in flags:
             # TODO implement prepared statement
-            query = f"INSERT INTO submitter VALUES ('{flag}', {tick}, 0, '{exploit}', 0)"
+            query = f"INSERT INTO submitter VALUES (?, ?, 0, ?', 0)"
+            data = (flag, tick, exploit)
             try:
-                dbm.exec_query(query)
+                dbm.exec_query(query, data)
             except sqlite3.IntegrityError:
                 duplicate += 1
         msg += f"<br>Duplicate flags: {duplicate}"

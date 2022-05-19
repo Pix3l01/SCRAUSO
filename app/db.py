@@ -24,10 +24,10 @@ class database:
         # Close connection
         con.close()
 
-    def exec_query(self, query: str):
+    def exec_query(self, query: str, data):
         con = sqlite3.connect(self.path)
         cur = con.cursor()
-        res = cur.execute(query).fetchall()
+        res = cur.execute(query, data).fetchall()
         con.commit()
         con.close()
         return res
