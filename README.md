@@ -45,10 +45,11 @@ scheduled_check = int # seconds of interval between checks for leftovers flags
 
 [sender]
 sender = "string" # Tipo di sender da utilizzare. Al momento: "forcADsender" e "ncsender"
-link = "string" # link del submission server (inizializzarlo anche se non utilizzato)
+link = "string" # link del submission server
 token = "string" # Token (inizializzarlo anche se non utilizzato)
-ip = "string" # ip del submission server (inizializzarlo anche se non utilizzato)
-port = int # Porta del submission server (inizializzarlo anche se non utilizzato)
+ip = "string" # ip del submission server
+host = "string" # IP o url del submission server
+port = int # Porta del submission server
 ```
 
 ## Status codes

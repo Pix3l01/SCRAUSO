@@ -7,15 +7,13 @@ from time import sleep
 from threading import Thread
 
 
-def start_receiver(dbm: db.database, sender_type, ip: str, port: int):
+def start_receiver(dbm: db.database, sender_type, server_ip: str, server_port: int):
     receiver.setDbm(dbm)
     receiver.setSender(sender_type)
-    receiver.app.run(host=ip, port=port)
+    receiver.app.run(host=server_ip, port=server_port)
 
 
 def load_config(path: str):
-    print('I\'m lazy so the program check for the existence of every parameter of the config even if not necessary. \
-So if you have error add also useless dummy parameters')
     try:
         with open(path, encoding="utf-8") as f:
             config = tomli.load(f)
@@ -23,21 +21,22 @@ So if you have error add also useless dummy parameters')
         print(f"Io error: {e}")
         exit(1)
     except tomli.TOMLDecodeError:
-        print("Can't load config")
+        print("Can't load config, maybe a parameter isn't specified")
         exit(2)
-    assert 'general' in config, 'Missing block \'general\' in config'
-    assert 'sender' in config, 'Missing block \'sender\' in config'
-    assert 'db' in config['general'], 'Parameter \'db\' missing in config block [general]'
-    assert 'port' in config['general'], 'Parameter \'ip\' missing in config block [general]'
-    assert 'port' in config['general'], 'Parameter \'port\' missing in config block [general]'
-    assert 'scheduled_check' in config['general'], 'Parameter \'scheduled_check\' missing in config block [general]'
-    assert 'link' in config['sender'], 'Parameter \'link\' missing in config block [sender]'
-    assert 'token' in config['sender'], 'Parameter \'token\' missing in config block [sender]'
-    assert 'ip' in config['sender'], 'Parameter \'ip\' missing in config block [sender]'
-    assert 'port' in config['sender'], 'Parameter \'port\' missing in config block [sender]'
-    assert 'sender' in config['sender'], 'Parameter \'sender\' missing in config block [sender]'
+    if 'general' not in config:
+        print('Missing block \'general\' in config')
+        exit(3)
+    if 'sender' not in config:
+        print('Missing block \'sender\' in config')
+        exit(3)
+    if 'db' not in config['general']:
+        print('Parameter \'db\' missing in config block [general]')
+        exit(3)
+    if 'sender' not in config['sender']:
+        print('Parameter \'sender\' missing in config block [sender]')
+        exit(3)
     print('done!')
-    return config
+    return config['general'], config['sender']
 
 
 def flags_per_exploit(database):
@@ -77,38 +76,97 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('\nIt needs a config file as argument')
         exit(0)
-    print('Loading configs', end=' ')
-    config_dict = load_config(sys.argv[1])
-    if config_dict['sender']['sender'] == 'forcADsender':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
-                                                                    config_dict['sender']['token'],
-                                                                    config_dict['sender']['link'])
-    elif config_dict['sender']['sender'] == 'ncsender':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
-                                                                    config_dict['sender']['token'],
-                                                                    config_dict['sender']['ip'],
-                                                                    config_dict['sender']['port'])
-    elif config_dict['sender']['sender'] == 'faustSender':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
-                                                                    config_dict['sender']['ip'],
-                                                                    config_dict['sender']['port'])
-    elif config_dict['sender']['sender'] == 'ctfzone':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
-                                                                    config_dict['sender']['token'],
-                                                                    config_dict['sender']['link'])
-    elif config_dict['sender']['sender'] == 'saarSender':
-        sender_object = class_dict[config_dict['sender']['sender']](config_dict['general']['db'],
-                                                                    config_dict['sender']['link'],
-                                                                    config_dict['sender']['port'])
-else:
-    print('Sender method not defined')
-    exit(3)
-dbm = db.database(config_dict['general']['db'])
-print('Initializing database', end=' ')
-dbm.init_database()
-print('done!')
-print('Starting missed flag checker')
-thread = Thread(target=repeated_check, args=(config_dict['general']['scheduled_check'], sender_object, dbm))
-thread.start()
-print('Starting receiver')
-start_receiver(dbm, sender_object, config_dict['general']['ip'], config_dict['general']['port'])
+    print('Loading config')
+    general_config, sender_config = load_config(sys.argv[1])
+    db_path = general_config['db']
+    sender_method = sender_config['sender']
+
+    if sender_method == 'forcADsender':
+        if 'token' not in sender_config:
+            print('Missing token in config')
+            exit(3)
+        token = sender_config['token']
+        if 'host' not in sender_config:
+            print('Missing submission host in config')
+            exit(0)
+        host = sender_config['host']
+        sender_object = class_dict[sender_method](db_path, token, host)
+
+    elif sender_method == 'ncsender':
+        if 'token' not in sender_config:
+            print('Missing token in config')
+            exit(3)
+        token = sender_config['token']
+        if 'host' not in sender_config:
+            print('Missing submission host in config')
+            exit(0)
+        host = sender_config['host']
+        if 'port' not in sender_config:
+            print('Missing submission server port in config')
+            exit(3)
+        port = sender_config['port']
+        sender_object = class_dict[sender_method](db_path, token, host, port)
+
+    elif sender_method == 'faustSender':
+        if 'host' not in sender_config:
+            print('Missing submission host in config')
+            exit(0)
+        host = sender_config['host']
+        if 'port' not in sender_config:
+            print('Missing submission server port in config')
+            exit(3)
+        port = sender_config['port']
+        sender_object = class_dict[sender_method](db_path, host, port)
+
+    elif sender_method == 'ctfzone':
+        if 'token' not in sender_config:
+            print('Missing token in config')
+            exit(3)
+        token = sender_config['token']
+        if 'host' not in sender_config:
+            print('Missing submission host in config')
+            exit(0)
+        host = sender_config['host']
+        sender_object = class_dict[sender_method](db_path, token, host)
+
+    elif sender_method == 'saarSender':
+        if 'host' not in sender_config:
+            print('Missing submission host in config')
+            exit(0)
+        host = sender_config['host']
+        if 'port' not in sender_config:
+            print('Missing submission server port in config')
+            exit(3)
+        port = sender_config['port']
+        sender_object = class_dict[sender_method](db_path, host, port)
+    else:
+        print('Sender method not defined')
+        exit(3)
+
+    dbm = db.database(db_path)
+    print('Initializing database', end=' ')
+    dbm.init_database()
+    print('done!')
+
+    print('Starting missed flag checker')
+    delay = 30
+    if 'scheduled_check' not in general_config:
+        print(f'No delay for scheduled check specified in config. Using default {delay}')
+    else:
+        delay = general_config['scheduled_check']
+    thread = Thread(target=repeated_check, args=(delay, sender_object, dbm))
+    thread.start()
+
+    print('Starting receiver')
+    ip = '0.0.0.0'
+    receiver_port = 5000
+    if 'ip' not in general_config or general_config['ip'] == '':
+        print(f'No server ip specified in config. Using default {ip}')
+    else:
+        ip = general_config['ip']
+
+    if 'port' not in general_config or general_config['port'] == '':
+        print(f'No server port specified in config. Using default {receiver_port}')
+    else:
+        receiver_port = general_config['port']
+    start_receiver(dbm, sender_object, ip, receiver_port)
