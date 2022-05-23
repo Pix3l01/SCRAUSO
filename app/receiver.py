@@ -41,8 +41,7 @@ def index():
         flags = content['flags']
         msg = "The exploit " + exploit + " has " + str(len(flags)) + " flags!"
         for flag in flags:
-            # TODO implement prepared statement
-            query = f"INSERT INTO submitter VALUES (?, ?, 0, ?', 0)"
+            query = f"INSERT INTO submitter VALUES (?, ?, 0, ?, 0)"
             data = (flag, tick, exploit)
             try:
                 dbm.exec_query(query, data)
